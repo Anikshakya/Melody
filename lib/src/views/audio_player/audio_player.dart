@@ -141,8 +141,18 @@ class AudioPlayerView extends StatelessWidget {
         final position = positionData.position;
         final duration = positionData.duration;
 
-        // Manage song completion
-        _handleSongCompletion(position, duration);
+        // Handle song completion after the build phase
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (position >= duration) {
+            if (audioController.isRepeat.value) {
+              audioController.seek(Duration.zero);
+            } else if (audioController.isShuffle.value) {
+              _playRandomSong();
+            } else {
+              audioController.next();
+            }
+          }
+        });
 
         return Column(
           children: [
