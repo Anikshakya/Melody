@@ -12,7 +12,7 @@ class AudioList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Music Player'),
+        title: const Text('Melody Music Player'),
       ),
       body: Obx(() {
         if (audioController.songList.isEmpty) {

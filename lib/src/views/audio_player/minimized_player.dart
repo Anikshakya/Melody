@@ -17,8 +17,8 @@ class _MinimizedPlayerState extends State<MinimizedPlayer> {
   Widget build(BuildContext context) {
     return Obx(() {
       // Only show the minimized player if there's a song and it's playing
-      if (audioController.songList.isEmpty || !audioController.isPlaying.value) {
-        return const SizedBox.shrink(); // Hide when there's no song or not playing
+      if (audioController.songList.isEmpty) {
+        return const SizedBox.shrink(); // Hide when there's no song
       }
 
       final currentSong = audioController.songList[audioController.currentIndex.value];
