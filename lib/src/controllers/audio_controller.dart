@@ -1,90 +1,68 @@
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:melody/src/services/permission_service.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 
 class AudioController extends GetxController {
-  final player = AudioPlayer();
-  var isPlaying = false.obs;
-  var currentSong = ''.obs;
-  var songList = <String>[].obs;
-  var currentIndex = 0.obs;
-  var isShuffle = false.obs;
-  var isRepeat = false.obs;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  final OnAudioQuery _audioQuery = OnAudioQuery();
+  RxList<SongModel> songList = <SongModel>[].obs;
+  RxInt currentIndex = 0.obs;
+  RxBool isPlaying = false.obs;
+  RxBool isShuffle = false.obs;
+  RxBool isRepeat = false.obs;
 
   @override
-  void onClose() {
-    player.dispose();
-    super.onClose();
+  void onInit() {
+    super.onInit();
+    checkPermission();
   }
 
-  Future<void> play(String path) async {
-    if (currentSong.value != path) {
-      currentSong.value = path;
-      try {
-        await player.setFilePath(path);
-        player.play();
-        isPlaying.value = true;
-      } catch (e) {
-        print("Error: $e");
-      }
-    } else if (!isPlaying.value) {
-      player.play();
+  checkPermission() async {
+    await PermissionService().requestStoragePermission();
+    fetchSongs();
+  }
+  Future fetchSongs() async {
+    final songs = await _audioQuery.querySongs();
+    songList.assignAll(songs);
+  }
+
+  void play(String uri) async {
+    try {
+      await _audioPlayer.setAudioSource(AudioSource.uri(Uri.parse(uri)));
+      _audioPlayer.play();
       isPlaying.value = true;
+    } catch (e) {
+      print('Error playing audio: $e');
     }
   }
 
   void pause() {
-    player.pause();
+    _audioPlayer.pause();
     isPlaying.value = false;
-  }
-
-  void stop() {
-    player.stop();
-    isPlaying.value = false;
-  }
-
-  Future<List<String>> pickSongs() async {
-    List<String> paths = [];
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.audio,
-      allowMultiple: true,
-    );
-    if (result != null) {
-      paths = result.paths.whereType<String>().toList();
-      songList.assignAll(paths);
-    }
-    return paths;
-  }
-
-  void next() {
-    if (currentIndex.value < songList.length - 1) {
-      currentIndex.value++;
-    } else {
-      currentIndex.value = 0;
-    }
-    play(songList[currentIndex.value]);
   }
 
   void previous() {
     if (currentIndex.value > 0) {
       currentIndex.value--;
-    } else {
-      currentIndex.value = songList.length - 1;
+      play(songList[currentIndex.value].uri!);
     }
-    play(songList[currentIndex.value]);
+  }
+
+  void next() {
+    if (currentIndex.value < songList.length - 1) {
+      currentIndex.value++;
+      play(songList[currentIndex.value].uri!);
+    }
   }
 
   void toggleShuffle() {
     isShuffle.value = !isShuffle.value;
+    // Implement shuffle logic if needed
   }
 
   void toggleRepeat() {
     isRepeat.value = !isRepeat.value;
-  }
-
-  void playCurrentSong() {
-    if (currentSong.value.isNotEmpty) {
-      play(currentSong.value);
-    }
+    // Implement repeat logic if needed
   }
 }

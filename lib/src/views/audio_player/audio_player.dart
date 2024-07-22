@@ -3,92 +3,97 @@ import 'package:get/get.dart';
 import 'package:melody/src/controllers/audio_controller.dart';
 
 class AudioPlayerView extends StatelessWidget {
-  AudioController audioController = Get.put(AudioController());
+  final AudioController audioController = Get.put(AudioController());
+  final int initialIndex;
 
-  AudioPlayerView({super.key});
+  AudioPlayerView({Key? key, required this.initialIndex}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // Set the current index when the view is initialized
+    audioController.currentIndex.value = initialIndex;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Now Playing'),
+        title: const Text('Audio Player'),
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 20),
-          Obx(() => Text(
-            audioController.currentSong.value.split('/').last,
-            style: const TextStyle(fontSize: 24),
-            textAlign: TextAlign.center,
-          )),
-          const SizedBox(height: 20),
-          const Expanded(
-            child: Center(
-              child: Icon(
-                Icons.music_note,
-                size: 150,
-                color: Colors.grey,
-              ),
+      body: Obx(() {
+        if (audioController.songList.isEmpty) {
+          return const Center(child: Text('No songs available'));
+        }
+
+        final currentSong = audioController.songList[audioController.currentIndex.value];
+        final songTitle = currentSong.title; // Use SongModel properties
+        final songArtist = currentSong.artist ?? 'Unknown Artist';
+        final songAlbum = currentSong.album ?? 'Unknown Album';
+
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Display current song title, artist, and album
+            Text(
+              songTitle,
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.skip_previous),
-                iconSize: 64,
-                onPressed: () {
-                  audioController.previous();
-                },
+            Text(
+              songArtist,
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              songAlbum,
+              style: Theme.of(context).textTheme.titleSmall,
+              textAlign: TextAlign.center,
+            ),
+            // Player controls
+            IconButton(
+              icon: Icon(
+                audioController.isPlaying.value ? Icons.pause : Icons.play_arrow,
+                size: 64,
               ),
-              Obx(() => IconButton(
-                icon: Icon(
-                  audioController.isPlaying.value ? Icons.pause : Icons.play_arrow,
+              onPressed: () {
+                if (audioController.isPlaying.value) {
+                  audioController.pause();
+                } else {
+                  audioController.play(currentSong.uri!); // Use SongModel.uri
+                }
+              },
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.skip_previous),
+                  onPressed: audioController.previous,
                 ),
-                iconSize: 64,
-                onPressed: () {
-                  if (audioController.isPlaying.value) {
-                    audioController.pause();
-                  } else {
-                    audioController.playCurrentSong();
-                  }
-                },
-              )),
-              IconButton(
-                icon: const Icon(Icons.skip_next),
-                iconSize: 64,
-                onPressed: () {
-                  audioController.next();
-                },
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon:  Icon(
-                  audioController.isShuffle.value ? Icons.shuffle_on : Icons.shuffle,
+                IconButton(
+                  icon: const Icon(Icons.skip_next),
+                  onPressed: audioController.next,
                 ),
-                iconSize: 36,
-                onPressed: () {
-                  audioController.toggleShuffle();
-                },
-              ),
-              IconButton(
-                icon:  Icon(
-                  audioController.isRepeat.value ? Icons.repeat_on : Icons.repeat,
+              ],
+            ),
+            // Shuffle and repeat controls
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    audioController.isShuffle.value ? Icons.shuffle : Icons.shuffle_outlined,
+                  ),
+                  onPressed: audioController.toggleShuffle,
                 ),
-                iconSize: 36,
-                onPressed: () {
-                  audioController.toggleRepeat();
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-        ],
-      ),
+                IconButton(
+                  icon: Icon(
+                    audioController.isRepeat.value ? Icons.repeat : Icons.repeat_one,
+                  ),
+                  onPressed: audioController.toggleRepeat,
+                ),
+              ],
+            ),
+          ],
+        );
+      }),
     );
   }
 }
