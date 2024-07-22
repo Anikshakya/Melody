@@ -5,36 +5,38 @@ import 'package:just_audio/just_audio.dart';
 import 'package:melody/src/models/audio_model.dart';
 import 'package:melody/src/services/permission_service.dart';
 import 'package:on_audio_query/on_audio_query.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'; // Import the notifications package
 
 class AudioController extends GetxController {
   final AudioPlayer audioPlayer = AudioPlayer();
   final OnAudioQuery audioQuery = OnAudioQuery();
-  
+  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin(); // Create an instance of the plugin
+
   RxList<AudioModel> songList = <AudioModel>[].obs;
   RxInt currentIndex = 0.obs;
   RxBool isPlaying = false.obs;
   RxBool isShuffle = false.obs;
   RxBool isRepeat = false.obs;
   var sliderPosition = 0.0.obs;
-  Rx<Duration> currentPosition = Duration.zero.obs; // Track the current position of the audio
+  Rx<Duration> currentPosition = Duration.zero.obs;
 
   @override
   void onInit() {
     super.onInit();
+    _initializeNotifications(); // Initialize notifications
     checkPermission();
 
-    // Update the current position and slider position when the position stream changes
     audioPlayer.positionStream.listen((position) {
       currentPosition.value = position;
       sliderPosition.value = position.inSeconds.toDouble();
+      _updateNotification(); // Update notification with current position
     });
 
-    // Update playback state when the state changes
     audioPlayer.playbackEventStream.listen((event) {
       isPlaying.value = audioPlayer.playing;
+      _updateNotification(); // Update notification with playback state
     });
 
-    // Handle end of song based on repeat or next song settings
     audioPlayer.processingStateStream.listen((state) {
       if (state == ProcessingState.completed) {
         if (isRepeat.value) {
@@ -44,6 +46,37 @@ class AudioController extends GetxController {
         }
       }
     });
+  }
+
+  /// Initialize notification settings
+  Future<void> _initializeNotifications() async {
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+    await _notificationsPlugin.initialize(initializationSettings);
+  }
+
+  /// Show or update the notification with current song details
+  Future<void> _updateNotification() async {
+    if (isPlaying.value) {
+      final song = songList[currentIndex.value];
+      await _notificationsPlugin.show(
+        0, // Notification ID
+        song.title,
+        '${song.artist} - ${song.album}',
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'your_channel_id', // Channel ID
+            'your_channel_name', // Channel name
+            channelDescription: 'your_channel_description', // Channel description
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+            playSound: false,
+          ),
+        ),
+      );
+    } else {
+      await _notificationsPlugin.cancel(0); // Cancel notification if not playing
+    }
   }
 
   /// Check and request permissions for accessing audio files
@@ -80,6 +113,7 @@ class AudioController extends GetxController {
       await audioPlayer.setAudioSource(AudioSource.uri(Uri.parse(uri)));
       await audioPlayer.play();
       isPlaying.value = true;
+      _updateNotification(); // Update notification when playback starts
     } catch (e) {
       log('Error playing audio: $e');
     }
@@ -90,6 +124,7 @@ class AudioController extends GetxController {
     try {
       await audioPlayer.play();
       isPlaying.value = true;
+      _updateNotification(); // Update notification when playback resumes
     } catch (e) {
       log('Error resuming audio: $e');
     }
@@ -101,6 +136,7 @@ class AudioController extends GetxController {
       currentPosition.value = audioPlayer.position; // Save the current position
       await audioPlayer.pause();
       isPlaying.value = false;
+      _updateNotification(); // Update notification when playback pauses
     } catch (e) {
       log('Error pausing audio: $e');
     }

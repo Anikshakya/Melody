@@ -8,7 +8,8 @@ class PermissionService {
       Permission.manageExternalStorage,
       Permission.audio,
       Permission.videos,
-      Permission.photos
+      Permission.photos,
+      Permission.notification
     ];
 
     // Check current permission statuses

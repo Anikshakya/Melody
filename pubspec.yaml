@@ -41,6 +41,7 @@ dependencies:
   on_audio_query: ^2.9.0
   permission_handler: ^11.3.1
   rxdart: ^0.28.0
+  flutter_local_notifications: ^14.0.0
 
 dev_dependencies:
   flutter_test:
