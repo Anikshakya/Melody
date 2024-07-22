@@ -3,10 +3,10 @@ import 'package:get/get.dart';
 import 'package:melody/src/controllers/audio_controller.dart';
 import 'package:melody/src/views/audio_player/audio_player.dart';
 
-class HomeView extends StatelessWidget {
+class AudioList extends StatelessWidget {
   final AudioController audioController = Get.put(AudioController());
 
-  HomeView({Key? key}) : super(key: key);
+  AudioList({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

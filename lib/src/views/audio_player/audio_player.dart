@@ -19,7 +19,6 @@ class AudioPlayerView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Audio Player'),
       ),
       body: Obx(() {
         if (audioController.songList.isEmpty) {
@@ -142,17 +141,7 @@ class AudioPlayerView extends StatelessWidget {
         final duration = positionData.duration;
 
         // Handle song completion after the build phase
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (position >= duration) {
-            if (audioController.isRepeat.value) {
-              audioController.seek(Duration.zero);
-            } else if (audioController.isShuffle.value) {
-              _playRandomSong();
-            } else {
-              audioController.next();
-            }
-          }
-        });
+        _handleSongCompletion(position, duration);
 
         return Column(
           children: [
@@ -186,16 +175,17 @@ class AudioPlayerView extends StatelessWidget {
   }
 
   void _handleSongCompletion(Duration position, Duration duration) {
-    // Move to the next song when the current one finishes
-    if (position >= duration) {
-      if (audioController.isRepeat.value) {
-        audioController.seek(Duration.zero);
-      } else if (audioController.isShuffle.value) {
-        _playRandomSong();
-      } else {
-        audioController.next();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (position >= duration) {
+        if (audioController.isRepeat.value) {
+          audioController.seek(Duration.zero);
+        } else if (audioController.isShuffle.value) {
+          _playRandomSong();
+        } else {
+          audioController.next();
+        }
       }
-    }
+    });
   }
 
   void _playRandomSong() {
