@@ -6,7 +6,7 @@ import 'package:melody/src/views/audio_player/audio_player.dart';
 class HomeView extends StatelessWidget {
   final AudioController audioController = Get.put(AudioController());
 
-  HomeView({super.key});
+  HomeView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +23,11 @@ class HomeView extends StatelessWidget {
             itemBuilder: (context, index) {
               final song = audioController.songList[index];
               return ListTile(
-                title: Text(song.title), // Use SongModel.title
-                subtitle: Text(song.artist ?? 'Unknown Artist'), // Use SongModel.artist
+                title: Text(song.title),
+                subtitle: Text(song.artist.toString()),
                 onTap: () {
                   audioController.currentIndex.value = index;
-                  audioController.play(song.uri!); // Use SongModel.uri
+                  audioController.play(uri: song.uri);
                   Get.to(
                     () => AudioPlayerView(
                       initialIndex: audioController.currentIndex.value,
