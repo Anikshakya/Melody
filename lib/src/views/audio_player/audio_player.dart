@@ -16,7 +16,14 @@ class AudioPlayerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: (){
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.keyboard_arrow_down, size: 35),
+        ),
+      ),
       body: Obx(() {
         if (audioController.songList.isEmpty) {
           return const Center(child: Text('No songs available'));

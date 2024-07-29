@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:melody/src/controllers/audio_controller.dart';
+import 'package:melody/src/helpers/common_function.dart';
 
 class AudioList extends StatefulWidget {
   const AudioList({Key? key}) : super(key: key);
@@ -69,6 +70,7 @@ class _AudioListState extends State<AudioList> {
             final song = filteredSongs[index];
             return Obx(() {
               return ListTile(
+                leading: _buildSongImage(song.image), // Add song image
                 trailing: audioController.currentIndex.value == audioController.songList.indexOf(song)
                     ? const Icon(Icons.music_note, color: Colors.deepPurple) // Icon indicating the current playing song
                     : null,
@@ -84,6 +86,31 @@ class _AudioListState extends State<AudioList> {
         );
       }
     });
+  }
+
+  /// Builds the song image for the list tile. If no image, shows a placeholder.
+  Widget _buildSongImage(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Icon(Icons.music_note, color: Colors.deepPurple),
+      );
+    } else {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: CommonFunctions().getImageWidget(
+          url: imageUrl,
+          width: 50,
+          height: 50,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
   }
 
   /// Builds the floating search bar for searching songs.
