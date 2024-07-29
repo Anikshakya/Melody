@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:melody/src/controllers/audio_controller.dart';
@@ -8,9 +7,11 @@ import 'package:melody/src/models/audio_model.dart';
 import 'package:rxdart/rxdart.dart' as rxdart;
 
 class AudioPlayerView extends StatelessWidget {
+  // Instantiate the audio controller using GetX
   final AudioController audioController = Get.put(AudioController());
   final int initialIndex;
 
+  // Constructor to initialize the initial index of the song
   AudioPlayerView({Key? key, required this.initialIndex}) : super(key: key);
 
   @override
@@ -18,32 +19,34 @@ class AudioPlayerView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          onPressed: (){
+          onPressed: () {
+            // Navigate back to the previous screen
             Navigator.pop(context);
           },
           icon: const Icon(Icons.keyboard_arrow_down, size: 35),
         ),
       ),
       body: Obx(() {
+        // Check if the song list is empty
         if (audioController.songList.isEmpty) {
           return const Center(child: Text('No songs available'));
         }
-        // Get the current song
+
+        // Get the current song based on the current index
         final currentSong = audioController.songList[audioController.currentIndex.value];
+
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Display the song image
             _buildSongImage(currentSong),
-            // Display current song title, artist, and album
+            // Display the song information
             _buildSongInfo(currentSong),
-            // Duration and Slider
+            // Display the duration and slider for playback
             _buildDurationAndSlider(),
-            // Player controls
-            _buildPlayerControls(currentSong.uri),
-            // Prev and Next
-            _buildPrevAndNext(),
-            // Shuffle and repeat controls
+            // Display play, pause, previous, and next controls
+            _buildPlayPausePrevAndNext(),
+            // Display shuffle and repeat controls
             _buildShuffleRepeatControls(),
           ],
         );
@@ -51,7 +54,7 @@ class AudioPlayerView extends StatelessWidget {
     );
   }
 
-  /// Build the widget to display the song image.
+  /// Builds the widget to display the song image.
   Widget _buildSongImage(AudioModel song) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -59,14 +62,15 @@ class AudioPlayerView extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         child: CommonFunctions().getImageWidget(
           url: song.image,
-          width: 300, // Set width as per your requirement
-          height: 300, // Set height as per your requirement
-          fit: BoxFit.cover, // Adjust the image fit
-        )
+          width: 300,
+          height: 300,
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }
 
+  /// Builds the widget to display the song information (title, artist, album).
   Widget _buildSongInfo(AudioModel song) {
     return Column(
       children: [
@@ -89,33 +93,32 @@ class AudioPlayerView extends StatelessWidget {
     );
   }
 
-  Widget _buildPlayerControls(String uri) {
-    return IconButton(
-      icon: Icon(
-        audioController.isPlaying.value ? Icons.pause : Icons.play_arrow,
-        size: 64,
-      ),
-      onPressed: () {
-        if (audioController.isPlaying.value) {
-          audioController.pause();
-        } else {
-          if (audioController.currentPosition.value > Duration.zero) {
-            audioController.resume();
-          } else {
-            audioController.play(uri: uri);
-          }
-        }
-      },
-    );
-  }
-
-  Widget _buildPrevAndNext() {
+  /// Builds the play, pause, previous, and next controls.
+  Widget _buildPlayPausePrevAndNext() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         IconButton(
           icon: const Icon(Icons.skip_previous),
           onPressed: audioController.previous,
+        ),
+        IconButton(
+          icon: Icon(
+            audioController.isPlaying.value ? Icons.pause : Icons.play_arrow,
+            size: 64,
+          ),
+          onPressed: () {
+            // Toggle play and pause based on current state
+            if (audioController.isPlaying.value) {
+              audioController.pause();
+            } else {
+              if (audioController.currentPosition.value > Duration.zero) {
+                audioController.resume();
+              } else {
+                audioController.play(uri: audioController.songList[audioController.currentIndex.value].uri);
+              }
+            }
+          },
         ),
         IconButton(
           icon: const Icon(Icons.skip_next),
@@ -125,6 +128,7 @@ class AudioPlayerView extends StatelessWidget {
     );
   }
 
+  /// Builds the shuffle and repeat controls.
   Widget _buildShuffleRepeatControls() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -132,12 +136,14 @@ class AudioPlayerView extends StatelessWidget {
         IconButton(
           icon: Icon(
             audioController.isShuffle.value ? Icons.shuffle : Icons.shuffle_outlined,
+            color: audioController.isShuffle.value ? Colors.deepPurple : null, // Change color based on shuffle state
           ),
           onPressed: audioController.toggleShuffle,
         ),
         IconButton(
           icon: Icon(
             audioController.isRepeat.value ? Icons.repeat_one : Icons.repeat,
+            color: audioController.isRepeat.value ? Colors.deepPurple : null, // Change color based on repeat state
           ),
           onPressed: audioController.toggleRepeat,
         ),
@@ -145,6 +151,7 @@ class AudioPlayerView extends StatelessWidget {
     );
   }
 
+  /// Builds the duration display and slider for the audio player.
   Widget _buildDurationAndSlider() {
     return StreamBuilder<PositionData>(
       stream: rxdart.Rx.combineLatest2(
@@ -153,19 +160,20 @@ class AudioPlayerView extends StatelessWidget {
         (position, duration) => PositionData(position, duration ?? Duration.zero),
       ),
       builder: (context, snapshot) {
+        // Show a loading indicator while waiting for data
         if (!snapshot.hasData) {
           return const Center(
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 20.0),
               child: CircularProgressIndicator(),
-            )
+            ),
           );
         }
         final positionData = snapshot.data!;
         final position = positionData.position;
         final duration = positionData.duration;
 
-        // Handle song completion after the build phase
+        // Handle song completion if the song finishes playing
         _handleSongCompletion(position, duration);
 
         return Column(
@@ -175,8 +183,8 @@ class AudioPlayerView extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(_formatDuration(position)),
-                  Text(_formatDuration(duration)),
+                  Text(_formatDuration(position)), // Display current position
+                  Text(_formatDuration(duration)), // Display total duration
                 ],
               ),
             ),
@@ -186,10 +194,10 @@ class AudioPlayerView extends StatelessWidget {
                 min: 0.0,
                 max: duration.inSeconds.toDouble(),
                 onChanged: (value) {
-                  audioController.sliderPosition.value = value;
+                  audioController.sliderPosition.value = value; // Update slider position
                 },
                 onChangeEnd: (value) {
-                  audioController.seek(Duration(seconds: value.toInt()));
+                  audioController.seek(Duration(seconds: value.toInt())); // Seek to the new position
                 },
               );
             }),
@@ -199,26 +207,30 @@ class AudioPlayerView extends StatelessWidget {
     );
   }
 
+  /// Handles song completion by checking if the song has finished playing.
   void _handleSongCompletion(Duration position, Duration duration) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (position >= duration) {
+        // If the song is finished, take appropriate action based on repeat and shuffle states
         if (audioController.isRepeat.value) {
-          audioController.seek(Duration.zero);
+          audioController.seek(Duration.zero); // Restart the song
         } else if (audioController.isShuffle.value) {
-          _playRandomSong();
+          _playRandomSong(); // Play a random song
         } else {
-          audioController.next();
+          audioController.next(); // Move to the next song
         }
       }
     });
   }
 
+  /// Plays a random song from the song list.
   void _playRandomSong() {
     final randomIndex = Random().nextInt(audioController.songList.length);
     audioController.currentIndex.value = randomIndex;
     audioController.play(uri: audioController.songList[randomIndex].uri);
   }
 
+  /// Formats the duration into a readable string (MM:SS).
   String _formatDuration(Duration duration) {
     final minutes = duration.inMinutes;
     final seconds = duration.inSeconds % 60;
@@ -226,6 +238,7 @@ class AudioPlayerView extends StatelessWidget {
   }
 }
 
+/// Class to hold the position and duration of the currently playing audio.
 class PositionData {
   final Duration position;
   final Duration duration;
