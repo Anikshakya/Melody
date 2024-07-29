@@ -1,8 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:melody/src/controllers/audio_controller.dart';
+import 'package:melody/src/helpers/common_function.dart';
 import 'package:melody/src/views/audio_player/audio_player.dart';
+import 'package:melody/src/widgets/animated_text.dart';
+import 'package:melody/src/widgets/spinner_widget.dart';
 
 class MinimizedPlayer extends StatefulWidget {
   const MinimizedPlayer({Key? key}) : super(key: key);
@@ -41,68 +43,80 @@ class _MinimizedPlayerState extends State<MinimizedPlayer> {
             ],
           ),
           padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              const SizedBox(width: 10.0),
-              // Song artwork
-              ClipOval(
-                child: currentSong.image != null 
-                  ? Image.file(
-                      File(currentSong.image!),
-                      width: 40, // Set the width for the image
-                      height: 40, // Set the height for the image
-                      fit: BoxFit.cover,
+          child: InkWell(
+            onTap: (){
+              Get.to(
+                () => AudioPlayerView(
+                  initialIndex: audioController.currentIndex.value,
+                ),
+                transition: Transition.downToUp,
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeInOut,
+              );
+            },
+            child: Row(
+              children: [
+                const SizedBox(width: 10.0),
+                // Song artwork
+                SpinnerWidget(
+                  isPlaying:  audioController.isPlaying.value,
+                  child: ClipOval(
+                    child:CommonFunctions().getImageWidget(
+                      url: currentSong.image,
+                      height: 40,
+                      width: 40,
+                      fit: BoxFit.cover
                     )
-                  : const Icon(Icons.music_note, color: Colors.white, size: 40), // Placeholder icon if no image
-              ),
-              const SizedBox(width: 10.0),
-              // Song title
-              Expanded(
-                child: Text(
-                  currentSong.title,
-                  style: const TextStyle(color: Colors.white),
-                  overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.skip_previous, color: Colors.white),
-                onPressed: () {
-                  audioController.previous();
-                },
-              ),
-              IconButton(
-                icon: Icon(
-                  audioController.isPlaying.value ? Icons.pause : Icons.play_arrow,
-                  color: Colors.white,
+                const SizedBox(width: 10.0),
+                // Song title
+                Expanded(
+                  child: AnimatedText(
+                    text: currentSong.title,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ),
-                onPressed: () {
-                  if (audioController.isPlaying.value) {
-                    audioController.pause();
-                  } else {
-                    audioController.resume();
-                  }
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.skip_next, color: Colors.white),
-                onPressed: () {
-                  audioController.next();
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.arrow_upward, color: Colors.white),
-                onPressed: () {
-                  Get.to(
-                    () => AudioPlayerView(
-                      initialIndex: audioController.currentIndex.value,
-                    ),
-                    transition: Transition.downToUp,
-                    duration: const Duration(milliseconds: 400),
-                    curve: Curves.easeInOut,
-                  );
-                },
-              ),
-            ],
+                IconButton(
+                  icon: const Icon(Icons.skip_previous, color: Colors.white),
+                  onPressed: () {
+                    audioController.previous();
+                  },
+                ),
+                IconButton(
+                  icon: Icon(
+                    audioController.isPlaying.value ? Icons.pause : Icons.play_arrow,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    if (audioController.isPlaying.value) {
+                      audioController.pause();
+                    } else {
+                      audioController.resume();
+                    }
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.skip_next, color: Colors.white),
+                  onPressed: () {
+                    audioController.next();
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.arrow_upward, color: Colors.white),
+                  onPressed: () {
+                    Get.to(
+                      () => AudioPlayerView(
+                        initialIndex: audioController.currentIndex.value,
+                      ),
+                      transition: Transition.downToUp,
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       );
