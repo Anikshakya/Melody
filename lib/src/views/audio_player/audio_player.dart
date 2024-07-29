@@ -42,6 +42,7 @@ class AudioPlayerView extends StatelessWidget {
             _buildSongImage(currentSong),
             // Display the song information
             _buildSongInfo(currentSong),
+            const SizedBox(height: 10),
             // Display the duration and slider for playback
             _buildDurationAndSlider(),
             // Display play, pause, previous, and next controls
@@ -178,16 +179,6 @@ class AudioPlayerView extends StatelessWidget {
 
         return Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(_formatDuration(position)), // Display current position
-                  Text(_formatDuration(duration)), // Display total duration
-                ],
-              ),
-            ),
             Obx(() {
               return Slider(
                 value: audioController.sliderPosition.value,
@@ -201,6 +192,16 @@ class AudioPlayerView extends StatelessWidget {
                 },
               );
             }),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(_formatDuration(position)), // Display current position
+                  Text(_formatDuration(duration)), // Display total duration
+                ],
+              ),
+            ),
           ],
         );
       },
