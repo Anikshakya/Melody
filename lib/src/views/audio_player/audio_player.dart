@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -18,8 +19,7 @@ class AudioPlayerView extends StatelessWidget {
     audioController.currentIndex.value = initialIndex;
 
     return Scaffold(
-      appBar: AppBar(
-      ),
+      appBar: AppBar(),
       body: Obx(() {
         if (audioController.songList.isEmpty) {
           return const Center(child: Text('No songs available'));
@@ -31,6 +31,8 @@ class AudioPlayerView extends StatelessWidget {
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Display the song image
+            _buildSongImage(currentSong),
             // Display current song title, artist, and album
             _buildSongInfo(currentSong),
             // Duration and Slider
@@ -44,6 +46,25 @@ class AudioPlayerView extends StatelessWidget {
           ],
         );
       }),
+    );
+  }
+
+  /// Build the widget to display the song image.
+  Widget _buildSongImage(AudioModel song) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: // Display the song image if it exists
+          song.image != null && song.image!.isNotEmpty
+          ? Image.file(
+              File(song.image!),
+              width: 300, // Set width as per your requirement
+              height: 300, // Set height as per your requirement
+              fit: BoxFit.cover, // Adjust the image fit
+            )
+          : const SizedBox(height: 100), // Placeholder if no image
+      ),
     );
   }
 
@@ -89,7 +110,7 @@ class AudioPlayerView extends StatelessWidget {
     );
   }
 
-  Widget _buildPrevAndNext (){
+  Widget _buildPrevAndNext() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:melody/src/controllers/audio_controller.dart';
@@ -7,7 +8,7 @@ class MinimizedPlayer extends StatefulWidget {
   const MinimizedPlayer({Key? key}) : super(key: key);
 
   @override
-  _MinimizedPlayerState createState() => _MinimizedPlayerState();
+  State<MinimizedPlayer> createState() => _MinimizedPlayerState();
 }
 
 class _MinimizedPlayerState extends State<MinimizedPlayer> {
@@ -24,14 +25,37 @@ class _MinimizedPlayerState extends State<MinimizedPlayer> {
       final currentSong = audioController.songList[audioController.currentIndex.value];
 
       return Positioned(
-        bottom: 0,
-        left: 0,
-        right: 0,
+        bottom: 16, // Add some space from the bottom
+        left: 16,   // Add some space from the left
+        right: 16,  // Add some space from the right
         child: Container(
-          color: Colors.black.withOpacity(0.8),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.8),
+            borderRadius: BorderRadius.circular(20), // Rounded corners
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black54,
+                blurRadius: 10.0,
+                offset: Offset(0, 4), // Shadow position
+              ),
+            ],
+          ),
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
+              const SizedBox(width: 10.0),
+              // Song artwork
+              ClipOval(
+                child: currentSong.image != null 
+                  ? Image.file(
+                      File(currentSong.image!),
+                      width: 40, // Set the width for the image
+                      height: 40, // Set the height for the image
+                      fit: BoxFit.cover,
+                    )
+                  : const Icon(Icons.music_note, color: Colors.white, size: 40), // Placeholder icon if no image
+              ),
+              const SizedBox(width: 10.0),
               // Song title
               Expanded(
                 child: Text(
@@ -68,9 +92,14 @@ class _MinimizedPlayerState extends State<MinimizedPlayer> {
               IconButton(
                 icon: const Icon(Icons.arrow_upward, color: Colors.white),
                 onPressed: () {
-                  Get.to(() => AudioPlayerView(
-                    initialIndex: audioController.currentIndex.value,
-                  ));
+                  Get.to(
+                    () => AudioPlayerView(
+                      initialIndex: audioController.currentIndex.value,
+                    ),
+                    transition: Transition.downToUp,
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeInOut,
+                  );
                 },
               ),
             ],
