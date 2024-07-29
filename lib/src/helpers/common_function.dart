@@ -15,7 +15,15 @@ class CommonFunctions {
     }
 
     // Common error widget using the placeholder
-    Widget defaultErrorWidget = Icon(Icons.music_note, color: Colors.deepPurple, size: height ?? 30);
+    Widget defaultErrorWidget = Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.deepPurple,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(Icons.music_note, color: Colors.white, size: height == null ? 30 : height / 1.7),
+    );
 
     // Handle network image
     if (url.startsWith('http') || url.startsWith('https')) {

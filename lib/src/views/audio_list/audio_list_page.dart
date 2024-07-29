@@ -90,27 +90,15 @@ class _AudioListState extends State<AudioList> {
 
   /// Builds the song image for the list tile. If no image, shows a placeholder.
   Widget _buildSongImage(String? imageUrl) {
-    if (imageUrl == null || imageUrl.isEmpty) {
-      return Container(
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: CommonFunctions().getImageWidget(
+        url: imageUrl,
         width: 50,
         height: 50,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: const Icon(Icons.music_note, color: Colors.deepPurple),
-      );
-    } else {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: CommonFunctions().getImageWidget(
-          url: imageUrl,
-          width: 50,
-          height: 50,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
+        fit: BoxFit.cover,
+      ),
+    );
   }
 
   /// Builds the floating search bar for searching songs.
