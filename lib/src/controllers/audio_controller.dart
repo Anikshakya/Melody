@@ -46,7 +46,6 @@ class AudioController extends GetxController {
       });
     });
     
-
     audioPlayer.processingStateStream.listen((state) {
       // Handle playback completion
       if (state == ProcessingState.completed) {
