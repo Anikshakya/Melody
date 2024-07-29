@@ -7,11 +7,11 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Stack(
         children: [
           AudioList(), // Your main content
-          const MinimizedPlayer(), // Minimized player
+          MinimizedPlayer(), // Minimized player
         ],
       ),
     );
