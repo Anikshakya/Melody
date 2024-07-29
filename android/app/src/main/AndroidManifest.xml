@@ -14,7 +14,7 @@
 
     
     <application
-        android:label="melody"
+        android:label="Melody"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -27,7 +27,11 @@ class AudioController extends GetxController {
   void onInit() {
     super.onInit();
     checkPermission(); // Check for necessary permissions
+    listenToAudioStreams();
+  }
 
+  // Listen To Audio Stream
+  listenToAudioStreams(){
     // Listen for position updates and playback events
     audioPlayer.positionStream.listen((position) {
       currentPosition.value = position;
@@ -195,21 +199,23 @@ class AudioController extends GetxController {
 
   /// Update the notification with the current song details
   void updateNotification() {
-    final currentSong = songList[currentIndex.value];
-    final mediaItem = MediaItem(
-      id: currentSong.uri,
-      title: currentSong.title,
-      artist: currentSong.artist,
-      album: currentSong.album,
-      duration: currentSong.duration,
-      artUri: Uri.file(currentSong.image!), // Use the image path
-    );
+    if(songList.isNotEmpty){
+      final currentSong = songList[currentIndex.value];
+      final mediaItem = MediaItem(
+        id: currentSong.uri,
+        title: currentSong.title,
+        artist: currentSong.artist,
+        album: currentSong.album,
+        duration: currentSong.duration,
+        artUri: Uri.file(currentSong.image!), // Use the image path
+      );
 
-    // Update the audio source with the current song
-    AudioSource.uri(
-      Uri.parse(currentSong.uri),
-      tag: mediaItem,
-    );
+      // Update the audio source with the current song
+      AudioSource.uri(
+        Uri.parse(currentSong.uri),
+        tag: mediaItem,
+      );
+    }
   }
 
   /// Seek to a specific position in the audio

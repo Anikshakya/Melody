@@ -1,33 +1,28 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:melody/src/controllers/audio_controller.dart';
+import 'package:melody/src/helpers/common_function.dart';
 import 'package:melody/src/models/audio_model.dart';
 import 'package:rxdart/rxdart.dart' as rxdart;
 
 class AudioPlayerView extends StatelessWidget {
-  final AudioController audioController = Get.find<AudioController>();
+  final AudioController audioController = Get.put(AudioController());
   final int initialIndex;
 
   AudioPlayerView({Key? key, required this.initialIndex}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Initialize the current index
-    audioController.currentIndex.value = initialIndex;
-
     return Scaffold(
       appBar: AppBar(),
       body: Obx(() {
         if (audioController.songList.isEmpty) {
           return const Center(child: Text('No songs available'));
         }
-
         // Get the current song
         final currentSong = audioController.songList[audioController.currentIndex.value];
-
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -55,15 +50,12 @@ class AudioPlayerView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
-        child: // Display the song image if it exists
-          song.image != null && song.image!.isNotEmpty
-          ? Image.file(
-              File(song.image!),
-              width: 300, // Set width as per your requirement
-              height: 300, // Set height as per your requirement
-              fit: BoxFit.cover, // Adjust the image fit
-            )
-          : const SizedBox(height: 100), // Placeholder if no image
+        child: CommonFunctions().getImageWidget(
+          url: song.image,
+          width: 300, // Set width as per your requirement
+          height: 300, // Set height as per your requirement
+          fit: BoxFit.cover, // Adjust the image fit
+        )
       ),
     );
   }
@@ -155,7 +147,12 @@ class AudioPlayerView extends StatelessWidget {
       ),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.0),
+              child: CircularProgressIndicator(),
+            )
+          );
         }
         final positionData = snapshot.data!;
         final position = positionData.position;

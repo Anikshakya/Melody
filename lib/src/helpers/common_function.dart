@@ -15,7 +15,7 @@ class CommonFunctions {
     }
 
     // Common error widget using the placeholder
-    const Widget defaultErrorWidget = Icon(Icons.music_note, color: Colors.deepPurple, size: 30);
+    Widget defaultErrorWidget = Icon(Icons.music_note, color: Colors.deepPurple, size: height ?? 30);
 
     // Handle network image
     if (url.startsWith('http') || url.startsWith('https')) {
