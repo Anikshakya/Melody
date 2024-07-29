@@ -5,6 +5,7 @@ class PermissionService {
   Future<void> checkAndRequestPermissions() async {
     final permissions = [
       Permission.manageExternalStorage,
+      Permission.storage,
       Permission.audio,
       Permission.videos,
       Permission.photos,

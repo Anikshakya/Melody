@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -47,15 +48,17 @@ class AudioController extends GetxController {
     });
     
     audioPlayer.processingStateStream.listen((state) {
-      // Handle playback completion
-      if (state == ProcessingState.completed) {
-        if (isRepeat.value) {
-          play(uri: songList[currentIndex.value].uri); // Repeat the current song
-        } else {
-          next(); // Move to the next song
-        }
+    // Handle playback completion
+    if (state == ProcessingState.completed) {
+      if (isRepeat.value) {
+        play(uri: songList[currentIndex.value].uri); // Repeat the current song
+      } else if (isShuffle.value) {
+        _playRandomSong(); // Play a random song if shuffle is enabled
+      } else {
+        next(); // Move to the next song
       }
-    });
+    }
+  });
   }
 
   /// Check and request permissions for accessing audio files
@@ -175,26 +178,51 @@ class AudioController extends GetxController {
   }
 
   void previous() {
-    if (currentIndex.value > 0) {
+    if (songList.isEmpty) return; // Return if the song list is empty
+
+    if (isRepeat.value) {
+      // Stay on the same song if repeat is enabled
+      play(uri: songList[currentIndex.value].uri);
+      return;
+    }
+
+    if (isShuffle.value && songList.length > 1) {
+      // If shuffle is enabled and there is more than one song
+      _playRandomSong();
+    } else {
+      // Move to the previous song if not at the beginning
+      if (currentIndex.value > 0) {
         currentIndex.value--;
-        // Reset slider position only if the new song has a valid duration
-        sliderPosition.value = songList[currentIndex.value].duration.inSeconds > 0
-            ? 0.0
-            : sliderPosition.value; 
-        play(uri: songList[currentIndex.value].uri);
+      } else {
+        currentIndex.value = songList.length - 1; // Go to the last song if at the beginning
+      }
+      play(uri: songList[currentIndex.value].uri);
     }
   }
 
   void next() {
-    if (currentIndex.value < songList.length - 1) {
+    if (songList.isEmpty) return; // Return if the song list is empty
+
+    if (isRepeat.value) {
+      // Stay on the same song if repeat is enabled
+      play(uri: songList[currentIndex.value].uri);
+      return;
+    }
+
+    if (isShuffle.value && songList.length > 1) {
+      // If shuffle is enabled and there is more than one song
+      _playRandomSong();
+    } else {
+      // Move to the next song or loop back to the first song if at the end
+      if (currentIndex.value < songList.length - 1) {
         currentIndex.value++;
-        // Reset slider position only if the new song has a valid duration
-        sliderPosition.value = songList[currentIndex.value].duration.inSeconds > 0
-            ? 0.0
-            : sliderPosition.value; 
-        play(uri: songList[currentIndex.value].uri);
+      } else {
+        currentIndex.value = 0; // Go to the first song if at the end
+      }
+      play(uri: songList[currentIndex.value].uri);
     }
   }
+
 
   /// Update the notification with the current song details
   void updateNotification() {
@@ -233,4 +261,13 @@ class AudioController extends GetxController {
     isRepeat.value = !isRepeat.value; // Toggle repeat state
     isShuffle.value = false; // Disable shuffle mode
   }
+
+  void _playRandomSong() {
+    if (songList.isEmpty) return; // Return if the song list is empty
+
+    final randomIndex = math.Random().nextInt(songList.length); // Get a random index
+    currentIndex.value = randomIndex; // Update the current index
+    play(uri: songList[randomIndex].uri); // Play the random song
+  }
+
 }

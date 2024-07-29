@@ -137,7 +137,7 @@ class AudioPlayerView extends StatelessWidget {
         ),
         IconButton(
           icon: Icon(
-            audioController.isRepeat.value ? Icons.repeat : Icons.repeat_one,
+            audioController.isRepeat.value ? Icons.repeat_one : Icons.repeat,
           ),
           onPressed: audioController.toggleRepeat,
         ),
