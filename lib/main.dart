@@ -6,7 +6,7 @@ import 'package:melody/src/views/splash_screen.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await JustAudioBackground.init(
-    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+    androidNotificationChannelId: 'com.aniklinkin.np',
     androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,
   );
